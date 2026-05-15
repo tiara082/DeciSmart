@@ -12,6 +12,7 @@ const recommendationRoutes = require('./recommendations');
 const historyRoutes = require('./history');
 const globalHistoryRoutes = require('./globalHistory');
 const adminRoutes = require('./admin');
+const aiRoutes = require('./ai');
 
 // Auth
 router.use('/auth', authRoutes);
@@ -31,6 +32,9 @@ router.use('/analysis', globalAnalysisRoutes);
 
 // Admin
 router.use('/admin', adminRoutes);
+
+// AI
+router.use('/ai', aiRoutes);
 
 // API info
 router.get('/', (req, res) => {

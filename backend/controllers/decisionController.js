@@ -87,7 +87,6 @@ const getDecision = async (req, res, next) => {
         *,
         alternatives(*),
         criteria(*),
-        scores(*),
         recommendations(*)
       `)
       .eq('id', id)
@@ -95,6 +94,18 @@ const getDecision = async (req, res, next) => {
 
     if (dataError || !decision) {
       return error(res, 'Decision not found', 404);
+    }
+
+    // Fetch scores separately since there is no direct FK from scores to decisions
+    if (decision.alternatives && decision.alternatives.length > 0) {
+      const altIds = decision.alternatives.map(a => a.id);
+      const { data: scores } = await supabaseAdmin
+        .from('scores')
+        .select('*')
+        .in('alternative_id', altIds);
+      decision.scores = scores || [];
+    } else {
+      decision.scores = [];
     }
 
     // Check ownership

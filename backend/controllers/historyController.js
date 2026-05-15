@@ -137,14 +137,19 @@ const getActivityStats = async (req, res, next) => {
   try {
     const userId = req.user.id;
 
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
     const [
       { count: totalActions },
       { count: decisionsCreated },
+      { count: decisionsCreatedThisMonth },
       { count: analysesRun },
       { count: decisionsViewed },
     ] = await Promise.all([
       supabaseAdmin.from('decision_history').select('*', { count: 'exact', head: true }).eq('user_id', userId),
       supabaseAdmin.from('decision_history').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('action_type', 'created'),
+      supabaseAdmin.from('decision_history').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('action_type', 'created').gte('created_at', firstDayOfMonth),
       supabaseAdmin.from('decision_history').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('action_type', 'analyzed'),
       supabaseAdmin.from('decision_history').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('action_type', 'viewed'),
     ]);
@@ -152,6 +157,7 @@ const getActivityStats = async (req, res, next) => {
     return success(res, {
       total_actions: totalActions || 0,
       decisions_created: decisionsCreated || 0,
+      decisions_created_this_month: decisionsCreatedThisMonth || 0,
       analyses_run: analysesRun || 0,
       decisions_viewed: decisionsViewed || 0,
     }, 'Activity stats retrieved');

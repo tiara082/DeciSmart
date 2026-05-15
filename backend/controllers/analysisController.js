@@ -48,12 +48,24 @@ const runAnalysis = async (req, res, next) => {
     // Fetch decision with all data
     const { data: decision } = await supabaseAdmin
       .from('decisions')
-      .select(`*, alternatives(*), criteria(*), scores(*)`)
+      .select(`*, alternatives(*), criteria(*)`)
       .eq('id', id)
       .single();
 
     if (!decision) return error(res, 'Decision not found', 404);
     if (decision.user_id !== req.user.id) return error(res, 'Access denied', 403);
+
+    // Fetch scores separately
+    if (decision.alternatives && decision.alternatives.length > 0) {
+      const altIds = decision.alternatives.map(a => a.id);
+      const { data: scores } = await supabaseAdmin
+        .from('scores')
+        .select('*')
+        .in('alternative_id', altIds);
+      decision.scores = scores || [];
+    } else {
+      decision.scores = [];
+    }
 
     // Validate
     if (!decision.alternatives || decision.alternatives.length < 2) {
@@ -145,12 +157,24 @@ const sensitivityAnalysis = async (req, res, next) => {
 
     const { data: decision } = await supabaseAdmin
       .from('decisions')
-      .select(`*, alternatives(*), criteria(*), scores(*)`)
+      .select(`*, alternatives(*), criteria(*)`)
       .eq('id', id)
       .single();
 
     if (!decision) return error(res, 'Decision not found', 404);
     if (decision.user_id !== req.user.id) return error(res, 'Access denied', 403);
+
+    // Fetch scores separately
+    if (decision.alternatives && decision.alternatives.length > 0) {
+      const altIds = decision.alternatives.map(a => a.id);
+      const { data: scores } = await supabaseAdmin
+        .from('scores')
+        .select('*')
+        .in('alternative_id', altIds);
+      decision.scores = scores || [];
+    } else {
+      decision.scores = [];
+    }
 
     if (!decision.alternatives || decision.alternatives.length < 2) {
       return error(res, 'Minimum 2 alternatives required', 400);

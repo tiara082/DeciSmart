@@ -4,11 +4,14 @@ const {
   getAllUsers,
   getUserById,
   toggleUserStatus,
+  createUser,
+  updateUser,
   updateUserRole,
   deleteUser,
   getAllDecisions,
   deleteDecision,
   getStats,
+  getAnalytics,
   getRecentActivity,
 } = require('../controllers/adminController');
 const { authenticate } = require('../middleware/auth');
@@ -23,6 +26,8 @@ router.use(authenticate, adminOnly);
 // User management
 router.get('/users', getUsersQuery, validate, getAllUsers);
 router.get('/users/:userId', userIdParam, validate, getUserById);
+router.post('/users', createUser);
+router.put('/users/:userId', userIdParam, validate, updateUser);
 router.put('/users/:userId/toggle', userIdParam, validate, toggleUserStatus);
 router.put('/users/:userId/role', userIdParam, updateUserRoleValidation, validate, updateUserRole);
 router.delete('/users/:userId', userIdParam, validate, deleteUser);
@@ -33,6 +38,7 @@ router.delete('/decisions/:id', idParam, validate, deleteDecision);
 
 // Statistics & activity
 router.get('/stats', getStats);
+router.get('/analytics', getAnalytics);
 router.get('/activity', getRecentActivity);
 
 module.exports = router;

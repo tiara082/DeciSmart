@@ -1,9 +1,76 @@
 const { supabaseAdmin } = require('../config/supabase');
 const { success, error, paginated } = require('../utils/response');
+const bcrypt = require('bcryptjs');
 
 // ================================================================
 // USER MANAGEMENT
 // ================================================================
+
+// POST /api/admin/users - Create a new user
+const createUser = async (req, res, next) => {
+  try {
+    const { full_name, email, password } = req.body;
+
+    if (!email || !password || !full_name) {
+      return error(res, 'full_name, email and password are required', 400);
+    }
+
+    // Check duplicate
+    const { data: existing } = await supabaseAdmin
+      .from('users').select('id').eq('email', email).single();
+    if (existing) return error(res, 'Email already registered', 409);
+
+    const password_hash = await bcrypt.hash(password, 12);
+
+    const { data: newUser, error: dbErr } = await supabaseAdmin
+      .from('users')
+      .insert({ email, password_hash, full_name, role: 'user', is_active: true, preferences: {} })
+      .select('id, email, full_name, role, is_active, created_at')
+      .single();
+
+    if (dbErr) throw dbErr;
+
+    return success(res, newUser, 'User created', 201);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// PUT /api/admin/users/:userId - Edit user info (name & email only, no role change)
+const updateUser = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const { full_name, email } = req.body;
+
+    if (!full_name && !email) {
+      return error(res, 'Provide full_name or email to update', 400);
+    }
+
+    const updates = {};
+    if (full_name) updates.full_name = full_name;
+    if (email) {
+      // Check email not taken by someone else
+      const { data: existing } = await supabaseAdmin
+        .from('users').select('id').eq('email', email).neq('id', userId).single();
+      if (existing) return error(res, 'Email already in use by another user', 409);
+      updates.email = email;
+    }
+
+    const { data: updated, error: dbErr } = await supabaseAdmin
+      .from('users')
+      .update(updates)
+      .eq('id', userId)
+      .select('id, email, full_name, role, is_active, created_at')
+      .single();
+
+    if (dbErr) throw dbErr;
+    if (!updated) return error(res, 'User not found', 404);
+
+    return success(res, updated, 'User updated');
+  } catch (err) {
+    next(err);
+  }
+};
 
 // GET /api/admin/users - Get all users
 const getAllUsers = async (req, res, next) => {
@@ -279,6 +346,84 @@ const getStats = async (req, res, next) => {
   }
 };
 
+// GET /api/admin/analytics - Get detailed analytics from real data
+const getAnalytics = async (req, res, next) => {
+  try {
+    // 1. All decisions with user and criteria/alternative counts
+    const { data: allDecisions, error: decErr } = await supabaseAdmin
+      .from('decisions')
+      .select('id, status, created_at, user_id, users(full_name, email)')
+      .order('created_at', { ascending: true });
+
+    if (decErr) throw decErr;
+
+    // 2. Alternatives & Criteria counts
+    const { count: totalAlternatives } = await supabaseAdmin
+      .from('alternatives')
+      .select('*', { count: 'exact', head: true });
+
+    const { count: totalCriteria } = await supabaseAdmin
+      .from('criteria')
+      .select('*', { count: 'exact', head: true });
+
+    // 3. Build decisions per day (last 30 days)
+    const today = new Date();
+    const dayMap = {};
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const key = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      dayMap[key] = 0;
+    }
+    allDecisions.forEach(dec => {
+      const d = new Date(dec.created_at);
+      const key = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      if (key in dayMap) dayMap[key]++;
+    });
+    const decisionTrend = Object.entries(dayMap).map(([date, count]) => ({ date, count }));
+
+    // 4. Decisions by status
+    const statusMap = {};
+    allDecisions.forEach(dec => {
+      statusMap[dec.status] = (statusMap[dec.status] || 0) + 1;
+    });
+    const decisionsByStatus = Object.entries(statusMap).map(([name, value]) => ({ name, value }));
+
+    // 5. Decisions by day of week
+    const dayOfWeekMap = { Sun: 0, Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0 };
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    allDecisions.forEach(dec => {
+      const day = days[new Date(dec.created_at).getDay()];
+      dayOfWeekMap[day]++;
+    });
+    const dayOfWeekStats = Object.entries(dayOfWeekMap).map(([day, decisions]) => ({ day, decisions }));
+
+    // 6. Top users by decision count
+    const userDecCount = {};
+    allDecisions.forEach(dec => {
+      const name = dec.users?.full_name || dec.users?.email || 'Unknown';
+      userDecCount[name] = (userDecCount[name] || 0) + 1;
+    });
+    const topUsers = Object.entries(userDecCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([name, count]) => ({ name, decisions: count }));
+
+    return success(res, {
+      totalDecisions: allDecisions.length,
+      totalAlternatives: totalAlternatives || 0,
+      totalCriteria: totalCriteria || 0,
+      completedDecisions: statusMap['completed'] || 0,
+      decisionTrend,
+      decisionsByStatus,
+      dayOfWeekStats,
+      topUsers,
+    }, 'Analytics retrieved');
+  } catch (err) {
+    next(err);
+  }
+};
+
 // GET /api/admin/activity - Get recent system activity
 const getRecentActivity = async (req, res, next) => {
   try {
@@ -302,10 +447,13 @@ module.exports = {
   getAllUsers,
   getUserById,
   toggleUserStatus,
+  createUser,
+  updateUser,
   updateUserRole,
   deleteUser,
   getAllDecisions,
   deleteDecision,
   getStats,
+  getAnalytics,
   getRecentActivity,
 };

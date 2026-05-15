@@ -14,7 +14,7 @@ const generateRecommendation = async (req, res, next) => {
     // Fetch decision with all related data
     const { data: decision } = await supabaseAdmin
       .from('decisions')
-      .select(`*, alternatives(*), criteria(*), scores(*)`)
+      .select(`*, alternatives(*), criteria(*)`)
       .eq('id', id)
       .single();
 
@@ -112,7 +112,7 @@ const compareMethods = async (req, res, next) => {
 
     const { data: decision } = await supabaseAdmin
       .from('decisions')
-      .select(`*, alternatives(*), criteria(*), scores(*)`)
+      .select(`*, alternatives(*), criteria(*)`)
       .eq('id', id)
       .single();
 
