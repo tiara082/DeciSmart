@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  Brain,
   Mail,
   Lock,
   ArrowRight,
@@ -50,7 +49,7 @@ export default function RegisterPage() {
       <div className="hidden lg:flex w-1/2 relative flex-col justify-between p-12 overflow-hidden bg-primary">
         {/* Background Image with Overlay */}
         <div
-          className="absolute inset-0 z-0 opacity-30 mix-blend-multiply bg-cover bg-center"
+          className="absolute inset-0 z-0 opacity-5 mix-blend-multiply bg-cover bg-center"
           style={{
             backgroundImage:
               "url('https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200&auto=format&fit=crop')",
@@ -59,24 +58,22 @@ export default function RegisterPage() {
 
         {/* Logo - Absolute Center */}
         <div className="absolute inset-0 flex flex-col items-center justify-center z-10 pointer-events-none">
-          <Link href="/" className="flex items-center gap-6 pointer-events-auto transition-transform hover:scale-105">
-            <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center shadow-2xl">
-              <Brain className="w-12 h-12 text-primary" />
-            </div>
-            <span className="text-6xl font-extrabold tracking-tight text-white drop-shadow-lg">DeciSmart</span>
+          <Link href="/" className="pointer-events-auto transition-transform hover:scale-105">
+            <img
+              src="/logo_baru.png"
+              alt="DeciSmart Logo"
+              className="h-56 w-auto object-contain"
+            />
           </Link>
         </div>
       </div>
 
       {/* RIGHT PANEL - Register Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 relative">
-        {/* Mobile Header (Hidden on Desktop) */}
-        <div className="absolute top-8 left-8 lg:hidden flex items-center gap-2">
-          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-lg">
-            <Brain className="w-6 h-6 text-primary-foreground" />
-          </div>
+        {/* Mobile Header */}
+        <div className="absolute top-8 left-8 lg:hidden">
           <span className="text-2xl font-bold tracking-tight text-foreground">
-            DeciSmart
+            Deci<span className="text-primary">Smart</span>
           </span>
         </div>
 
@@ -164,7 +161,6 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Error message */}
             {error && (
               <div className="rounded-lg bg-destructive/10 border border-destructive/30 px-4 py-3 text-sm text-destructive font-medium">
                 {error}

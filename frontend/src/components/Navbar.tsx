@@ -21,12 +21,12 @@ export function Navbar() {
     <nav className="bg-background border-b border-border sticky top-0 z-40 print:hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center group-hover:bg-primary/90 transition-colors">
-              <Brain className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold text-foreground hidden sm:inline">DeciSmart</span>
+            <img 
+              src="/logo_baru.png" 
+              alt="DeciSmart Logo" 
+              className="h-14 w-auto object-contain"
+            />
           </Link>
 
           {/* Desktop Menu */}

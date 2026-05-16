@@ -83,16 +83,14 @@ export default function AdminSidebar() {
         }`}
       >
         <div className="flex flex-col h-full">
-          {/* Logo */}
-          <div className="px-6 py-8 border-b border-slate-700">
-            <Link href="/admin" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center">
-                <LayoutDashboard className="h-6 w-6 text-slate-900" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold">DeciSmart</h2>
-                <p className="text-xs text-slate-400">Admin Panel</p>
-              </div>
+          <div className="px-6 py-6 border-b border-slate-700">
+            <Link href="/admin" className="flex flex-col gap-2">
+              <img 
+                src="/logo_baru.png" 
+                alt="DeciSmart Logo" 
+                className="h-16 w-auto object-contain"
+              />
+              <p className="text-xs text-slate-400 font-medium ml-1">Admin Panel</p>
             </Link>
           </div>
 
