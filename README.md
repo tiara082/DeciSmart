@@ -30,7 +30,6 @@ This leads to costly mistakes, missed opportunities, and decision regret.
 - **AI-Powered Analysis** - Intelligent evaluation of alternatives using Groq AI
 - **Structured Methodology** - Multi-criteria decision analysis (MCDM) framework built-in
 - **Decision Tracking** - Keep a history of decisions and outcomes for learning and accountability
-- **Collaborative Tools** - Admin dashboard for team oversight and analytics
 - **Real-time Recommendations** - AI suggestions based on your specific context
 - **Comparative Insights** - Visual rankings and trade-off analysis
 
