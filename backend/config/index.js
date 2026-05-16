@@ -1,5 +1,19 @@
 require('dotenv').config();
 
+function parseCorsOrigins(value) {
+  return String(value || '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+const defaultCorsOrigins = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+];
+
+const configuredCorsOrigins = parseCorsOrigins(process.env.CORS_ORIGIN);
+
 module.exports = {
   // Server
   port: parseInt(process.env.PORT, 10) || 5000,
@@ -26,7 +40,9 @@ module.exports = {
 
   // CORS
   cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origins: configuredCorsOrigins.length > 0
+      ? configuredCorsOrigins
+      : defaultCorsOrigins,
   },
 
   // Rate Limiting

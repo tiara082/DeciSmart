@@ -54,11 +54,13 @@ async function request<T>(
     const validationErrors = Array.isArray(json?.errors) ? json.errors : [];
     if (validationErrors.length > 0) {
       const details = validationErrors
-        .map((item: { field?: string; message?: string }) => item.message)
+        .map((item: { field?: string; message?: string }) => item.message || item)
         .filter(Boolean)
-        .join('; ');
+        .join(' • ');
 
-      throw new Error(`${json?.message || 'Request failed'}: ${details}`);
+      if (details) {
+        throw new Error(details);
+      }
     }
 
     throw new Error(json?.message || `API error ${res.status}`);
