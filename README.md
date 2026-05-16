@@ -1,131 +1,66 @@
 # DeciSmart
 
-DeciSmart is an AI-powered decision support platform designed to help teams and individual users evaluate alternatives, compare criteria, and document decisions with a structured workflow.
+**AI-Powered Decision Support Platform**
 
-The repository is organized as a two-tier application:
+## The Problem
 
-- `frontend`: Next.js application for the user interface and dashboard experience.
-- `backend`: Express.js API for authentication, decision processing, history, analysis, and admin workflows.
+Every day, we face critical decisions—choosing between job offers, selecting vendors, evaluating project proposals, or picking the right investment. Yet many of us struggle with:
 
-## Repository Structure
+- **Bias**: Unconscious preferences cloud our judgment
+- **Information Overload**: Too many factors to consider simultaneously  
+- **Inconsistency**: Similar decisions evaluated differently over time
+- **Lack of Clarity**: No structured way to compare trade-offs
 
-```text
-DeciSmart/
-  backend/
-    config/
-    controllers/
-    database/
-    middleware/
-    routes/
-    scripts/
-    services/
-    utils/
-    validators/
-  frontend/
-    src/
-      app/
-      components/
-      hooks/
-      lib/
-      styles/
-  vercel.json
-```
+This leads to costly mistakes, missed opportunities, and decision regret.
 
-## What It Covers
+## The Solution
 
-- Decision creation and management
-- Alternative comparison and scoring
-- Criteria-based analysis
-- AI-assisted recommendations
-- Decision history and reporting
-- Admin pages for operational oversight
-- Supabase-backed authentication and data storage
+**DeciSmart** combines structured decision-making frameworks with AI analysis to help individuals and teams make confident, data-driven choices. Instead of relying on gut feeling or incomplete comparisons, DeciSmart guides you through a proven methodology while AI provides objective analysis and insights.
 
-## Local Setup
+## How It Works
 
-### Prerequisites
+1. **Define**: Describe your decision and what matters most
+2. **Alternatives**: List all options under consideration  
+3. **Criteria**: Set the factors that influence your choice (cost, quality, risk, etc.)
+4. **Analyze**: AI evaluates each alternative against your criteria
+5. **Decide**: Review insights and make informed decisions with confidence
 
-- Node.js 18 or newer
-- npm
-- A Supabase project
-- A Groq API key
+## Key Features
 
-### 1. Install dependencies
+- **AI-Powered Analysis** - Intelligent evaluation of alternatives using Groq AI
+- **Structured Methodology** - Multi-criteria decision analysis (MCDM) framework built-in
+- **Decision Tracking** - Keep a history of decisions and outcomes for learning and accountability
+- **Collaborative Tools** - Admin dashboard for team oversight and analytics
+- **Real-time Recommendations** - AI suggestions based on your specific context
+- **Comparative Insights** - Visual rankings and trade-off analysis
 
-From the repository root:
+## Use Cases
 
-```bash
-cd backend
-npm install
+- **Hiring Teams**: Evaluate candidates objectively across multiple competencies
+- **Product Managers**: Choose between feature proposals with clear trade-offs
+- **Business Leaders**: Compare vendor proposals, investment opportunities, or strategic initiatives  
+- **Career Decisions**: Navigate job offers, education paths, or relocation choices
+- **Personal Finance**: Make confident purchasing or investment decisions
 
-cd ../frontend
-npm install
-```
+## Why DeciSmart?
 
-### 2. Configure environment variables
+- **Reduce Bias**: Systematic evaluation removes unconscious preferences
+- **Save Time**: Structured workflow completes analysis in minutes, not hours
+- **Increase Confidence**: AI-backed insights provide reassurance in your decision
+- **Build Consistency**: Apply the same rigorous process to all your decisions
+- **Learn & Improve**: Track outcomes and refine your decision-making over time
 
-Create or update `backend/.env` with the values required by the API.
+## Technology Stack
 
-```bash
-SUPABASE_URL=
-SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-JWT_SECRET=
-JWT_EXPIRES_IN=1h
-GROQ_API_KEY=
-GROQ_MODEL=llama-3.3-70b-versatile
-PORT=5000
-NODE_ENV=development
-CORS_ORIGIN=http://localhost:3000
-```
+- **Frontend**: Next.js 16 with TypeScript and Tailwind CSS
+- **Backend**: Express.js with Supabase for data and auth
+- **AI**: Groq API for LLM-powered recommendations
+- **Deployment**: Vercel (frontend + backend microservices)
 
-If the frontend needs additional runtime variables, keep them in the frontend environment file used by your deployment or local setup.
+## Quick Start
 
-### 3. Start the applications
+Visit [decismart.vercel.app](https://decismart.vercel.app) and create an account to start making better decisions today.
 
-Run the API first, then the web app.
+---
 
-```bash
-cd backend
-npm run dev
-```
-
-```bash
-cd frontend
-npm run dev
-```
-
-## Available Scripts
-
-### Backend
-
-- `npm run dev` - start the API in development mode with nodemon
-- `npm run start` - start the API in production mode
-- `npm run seed` - load seed data into the database
-
-### Frontend
-
-- `npm run dev` - start the Next.js development server
-- `npm run build` - build the frontend for production
-- `npm run start` - start the production frontend server
-- `npm run lint` - run Next.js lint checks
-
-## Deployment Notes
-
-The project is prepared for Vercel deployment. The current `vercel.json` maps:
-
-- `frontend` to the root route
-- `backend` to `/_/backend`
-
-Make sure the deployed environment includes the same API and Supabase variables used locally.
-
-## Operational Notes
-
-- The backend exposes a health check at `/health`.
-- The API root returns a short endpoint summary at `/api`.
-- Keep Supabase credentials and JWT secrets out of source control.
-- If you change the schema or RLS policies, review the SQL files in `backend/database/` before deploying.
-
-## Support
-
-For new contributors, the recommended path is to review the app flow in the frontend dashboard and the API routes in `backend/routes/` before making changes. That gives a clear view of how the decision workflow moves through the system.
+*DeciSmart is built for anyone who wants to move from indecision to insight.*
