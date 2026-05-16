@@ -9,6 +9,22 @@ const { logger } = require('./middleware/logger');
 
 const app = express();
 
+function isAllowedCorsOrigin(origin) {
+  if (!origin) return true;
+
+  if (config.cors.origins.includes(origin)) return true;
+
+  try {
+    const hostname = new URL(origin).hostname;
+    return hostname === 'localhost'
+      || hostname === '127.0.0.1'
+      || hostname.endsWith('.vercel.app')
+      || hostname === 'vercel.app';
+  } catch {
+    return false;
+  }
+}
+
 // Request logging
 app.use(logger);
 
@@ -17,7 +33,14 @@ app.use(helmet());
 
 // CORS
 app.use(cors({
-  origin: config.cors.origin,
+  origin(origin, callback) {
+    if (isAllowedCorsOrigin(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
 }));
 

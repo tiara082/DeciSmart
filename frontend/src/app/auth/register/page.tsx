@@ -159,6 +159,9 @@ export default function RegisterPage() {
                   required
                 />
               </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Password must be at least 8 characters and contain both letters and numbers.
+              </p>
             </div>
 
             {error && (
