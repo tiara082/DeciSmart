@@ -1,5 +1,18 @@
 // Centralized API client for communicating with the Express backend
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+function getApiBase(): string {
+  const configuredBase = process.env.NEXT_PUBLIC_API_URL;
+  if (configuredBase) return configuredBase;
+
+  if (typeof window !== 'undefined') {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://localhost:5000';
+    }
+
+    return `${window.location.origin}/_/backend`;
+  }
+
+  return 'http://localhost:5000';
+}
 
 // ─────────────────────────────────────────────
 // Helpers
@@ -18,19 +31,27 @@ async function request<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const res = await fetch(`${API_BASE}/api${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...authHeaders(),
-      ...(options.headers as Record<string, string>),
-    },
-  });
+  const url = `${getApiBase()}/api${path}`;
 
-  const json = await res.json();
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders(),
+        ...(options.headers as Record<string, string>),
+      },
+    });
+  } catch {
+    throw new Error('Unable to reach the API server. Please check the deployment or network connection.');
+  }
+
+  const contentType = res.headers.get('content-type') || '';
+  const json = contentType.includes('application/json') ? await res.json() : null;
 
   if (!res.ok) {
-    throw new Error(json.message || `API error ${res.status}`);
+    throw new Error(json?.message || `API error ${res.status}`);
   }
 
   return json as T;
