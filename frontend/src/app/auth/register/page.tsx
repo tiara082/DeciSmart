@@ -162,6 +162,9 @@ export default function RegisterPage() {
                   required
                 />
               </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Password minimal 8 karakter dan harus mengandung huruf serta angka.
+              </p>
             </div>
 
             {/* Error message */}

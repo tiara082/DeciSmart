@@ -51,6 +51,16 @@ async function request<T>(
   const json = contentType.includes('application/json') ? await res.json() : null;
 
   if (!res.ok) {
+    const validationErrors = Array.isArray(json?.errors) ? json.errors : [];
+    if (validationErrors.length > 0) {
+      const details = validationErrors
+        .map((item: { field?: string; message?: string }) => item.message)
+        .filter(Boolean)
+        .join('; ');
+
+      throw new Error(`${json?.message || 'Request failed'}: ${details}`);
+    }
+
     throw new Error(json?.message || `API error ${res.status}`);
   }
 
