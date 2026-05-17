@@ -14,20 +14,46 @@ export default function UserDashboard() {
   const [recentDecisions, setRecentDecisions] = useState<any[]>([]);
   const [stats, setStats] = useState({ total: 0, completed: 0, inProgress: 0 });
   const [loading, setLoading] = useState(true);
+  const [topCriteria, setTopCriteria] = useState<string[]>([]);
 
   useEffect(() => {
     decisionsApi.getDecisions({ limit: 5 })
-      .then((res) => {
+      .then(async (res) => {
         const decisions = res.data;
         setRecentDecisions(decisions);
         
-        // Calculate basic stats from recent decisions (for demo purposes)
-        const completed = decisions.filter((d: any) => d.status === 'completed').length;
+        const completed = decisions.filter((d: any) => d.status === 'completed');
         setStats({
           total: decisions.length,
-          completed: completed,
-          inProgress: decisions.length - completed
+          completed: completed.length,
+          inProgress: decisions.length - completed.length
         });
+
+        // Fetch criteria from completed decisions for insights
+        if (completed.length > 0) {
+          try {
+            const criteriaMap: Record<string, number> = {};
+            const fetches = completed.slice(0, 3).map((d: any) =>
+              decisionsApi.get(d.id).then(r => r.data)
+            );
+            const details = await Promise.all(fetches);
+            details.forEach((detail: any) => {
+              if (detail.criteria) {
+                detail.criteria.forEach((c: any) => {
+                  criteriaMap[c.name] = (criteriaMap[c.name] || 0) + (c.weight || 1);
+                });
+              }
+            });
+            const sorted = Object.entries(criteriaMap)
+              .sort((a, b) => b[1] - a[1])
+              .slice(0, 3)
+              .map(([name]) => name);
+            setTopCriteria(sorted);
+          } catch (e) {
+            console.error('Failed to fetch criteria for insights:', e);
+          }
+        }
+
         setLoading(false);
       })
       .catch((err) => {
@@ -148,16 +174,43 @@ export default function UserDashboard() {
                 {/* Insight Panel */}
                 <div>
                   <h2 className="text-xl font-bold text-foreground mb-4">Insights</h2>
-                  <div className="bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 rounded-xl p-6">
-                    <Brain className="w-8 h-8 text-primary mb-4" />
-                    <h3 className="font-semibold text-foreground mb-2">Decision Pattern</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Based on your recent activity, you tend to prioritize <strong className="text-foreground">Price</strong> and <strong className="text-foreground">Performance</strong> in your evaluations.
-                    </p>
-                    <div className="bg-background/50 rounded-lg p-3 border border-border/50 text-xs text-muted-foreground">
-                      * More insights will unlock as you make more decisions using DeciSmart.
+                  {stats.completed === 0 ? (
+                    <div className="bg-card border border-border border-dashed rounded-xl p-6 text-center">
+                      <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Brain className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                      <h3 className="font-semibold text-foreground mb-1">No insights yet</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Complete your first decision to unlock personalized insights about your decision-making patterns.
+                      </p>
                     </div>
-                  </div>
+                  ) : topCriteria.length > 0 ? (
+                    <div className="bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 rounded-xl p-6">
+                      <Brain className="w-8 h-8 text-primary mb-4" />
+                      <h3 className="font-semibold text-foreground mb-2">Decision Pattern</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Based on your recent activity, you tend to prioritize{' '}
+                        {topCriteria.map((c, i) => (
+                          <span key={c}>
+                            {i > 0 && i === topCriteria.length - 1 ? ' and ' : i > 0 ? ', ' : ''}
+                            <strong className="text-foreground">{c}</strong>
+                          </span>
+                        ))}{' '}
+                        in your evaluations.
+                      </p>
+                      <div className="bg-background/50 rounded-lg p-3 border border-border/50 text-xs text-muted-foreground">
+                        * More insights will unlock as you make more decisions using DeciSmart.
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 rounded-xl p-6">
+                      <Brain className="w-8 h-8 text-primary mb-4" />
+                      <h3 className="font-semibold text-foreground mb-2">Getting Started</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        You have {stats.completed} completed {stats.completed === 1 ? 'decision' : 'decisions'}. Keep making decisions to unlock pattern insights.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </>
